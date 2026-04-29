@@ -1,0 +1,61 @@
+
+/****** OCI pre-reqs:
+- Instance Principal: 
+Allow dynamic-group <dg-da-vm> to read secret-family in compartment id <comp-ocid>
+
+- Secrets: 
+Allow dynamic-group <dg-name> to read secret-family in compartment <comp>
+
+- ADB Tag:  
+ Tag Name:  adb$feature
+ Tag Value: {"name":"mcp_server","enable":true}
+*****/
+
+
+-- USER SQL
+CREATE USER MCP_USER IDENTIFIED BY "insert_your_password";
+
+-- ADD ROLES
+GRANT CONNECT TO MCP_USER;
+GRANT CONSOLE_DEVELOPER TO MCP_USER;
+GRANT DB_DEVELOPER_ROLE TO MCP_USER;
+GRANT DWROLE TO MCP_USER;
+GRANT GRAPH_DEVELOPER TO MCP_USER;
+GRANT OML_DEVELOPER TO MCP_USER;
+GRANT RESOURCE TO MCP_USER;
+GRANT SPATIAL_AUTHOR TO MCP_USER;
+ALTER USER MCP_USER DEFAULT ROLE CONNECT,CONSOLE_DEVELOPER,DWROLE,RESOURCE;
+
+-- ENABLE REST
+BEGIN
+    ORDS_ADMIN.ENABLE_SCHEMA(
+        p_enabled => TRUE,
+        p_schema => 'MCP_USER',
+        p_url_mapping_type => 'BASE_PATH',
+        p_url_mapping_pattern => 'mcp_user',
+        p_auto_rest_auth=> TRUE
+    );
+    -- ENABLE DATA SHARING
+    C##ADP$SERVICE.DBMS_SHARE.ENABLE_SCHEMA(
+            SCHEMA_NAME => 'MCP_USER',
+            ENABLED => TRUE
+    );
+    commit;
+END;
+/
+
+-- ENABLE GRAPH
+ALTER USER MCP_USER GRANT CONNECT THROUGH GRAPH$PROXY_USER;
+
+-- ENABLE SPATIAL
+ALTER USER MCP_USER GRANT CONNECT THROUGH SPATIAL$PROXY_USER;
+
+-- ENABLE OML
+ALTER USER MCP_USER GRANT CONNECT THROUGH OML$PROXY;
+
+-- QUOTA
+ALTER USER MCP_USER QUOTA UNLIMITED ON DATA;
+
+-- GRANT DBMS_CLOUD_AI_AGENT
+GRANT EXECUTE ON DBMS_CLOUD_AI_AGENT TO MCP_USER;
+GRANT EXECUTE ON DBMS_CLOUD TO MCP_USER;
