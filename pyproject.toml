@@ -7,6 +7,13 @@ requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.28.1",
     "mcp>=1.27.0",
+    "numpy<2",
     "oci>=2.173.0",
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+    "oracledb>=4.0.0",
     "python-dotenv>=1.2.2",
+    "sentence-transformers>=2.7",
+    "torch>=2.2",
+    "transformers>=4.40,<5",
 ]
